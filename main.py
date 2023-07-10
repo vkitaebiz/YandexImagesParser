@@ -15,7 +15,7 @@ logger = logging.Logger(__name__)
 
 logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
-basic_formater = logging.Formatter('%(asctime)s : [%(levelname)s] : %(message)s : %(lineno)d')
+basic_formater = logging.Formatter('%(asctime)s : [%(levelname)s] : : %(lineno)d %(message)s')
 sh.setFormatter(basic_formater)
 logger.addHandler(sh)
 
@@ -27,8 +27,8 @@ class Parser:
 
 
     def _get_folders_with_files(self):
-        folders = os.path.join(self._result_folder)
-        folders = list(filter(lambda folder: os.listdir(folders), folders))
+        folders = os.listdir(self._result_folder)
+        folders = list(filter(lambda folder: os.listdir(os.path.join(self._result_folder, folder)), folders))
         return folders
 
 
@@ -104,7 +104,7 @@ class Parser:
                     return None
 
     def save_image(self, url, path):
-        logger.debug(url)
+        logger.debug(f'{path} - {url}')
         image_content = self.make_request_with_retries(url)
         if image_content:
             with open(path, 'wb') as file:
