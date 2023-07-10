@@ -44,9 +44,7 @@ class Parser:
                 result = self._parser.search(keyword, self._parser.size.large)
                 if not result:
                     raise Exception('Проблемы с парсингом')
-                path = os.path.join('result', keyword)
-                if not os.path.exists(path):
-                    os.makedirs(path)
+
                 for item in result:
                     url = item.url
                     x, y = item.width, item.height
