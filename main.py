@@ -63,7 +63,9 @@ class Parser:
 
                             queue.put((url, full_path))
                             checking_url.add(url)
-                sleep(random.randint(1, 300))
+                pause = random.randint(1, 300)
+                logger.debug('Пауза запроса:', pause)
+                sleep(pause)
         queue.put('stop')
 
     @staticmethod
