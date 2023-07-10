@@ -1,0 +1,9 @@
+[submodule "YandexImagesParser"]
+	path = YandexImagesParser
+	url = https://github.com/Ulbwaa/YandexImagesParser
+[submodule "python_modules"]
+	path = python_modules
+	url = git@bitbucket.org:skyline3601/python_modules.git
+[submodule "bin"]
+	path = bin
+	url = git@bitbucket.org:skyline3601/bin.git
