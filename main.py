@@ -41,9 +41,15 @@ class Parser:
                 was_keyword.add(keyword)
                 logger.debug( keyword)
                 if not keyword: continue
-                result = self._parser.search(keyword, self._parser.size.large)
-                if not result:
-                    raise Exception('Проблемы с парсингом')
+                while True:
+                    result = self._parser.search(keyword, self._parser.size.large)
+                    if not result:
+                        logger.error('Проблемы с парсингом')
+                        pause = 600
+                        logger.debug('Пауза основного парсера из-за пустого ответа: %s', pause)
+                        sleep(pause)
+                    else:
+                        break
 
                 for item in result:
                     url = item.url
