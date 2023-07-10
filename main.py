@@ -1,14 +1,10 @@
 import logging
 import random
 from python_modules.script_control import ScriptControl
-
 from YandexImagesParser.ImageParser import YandexImage
 import pandas as pd
 import os
 from time import sleep
-import aiohttp
-import asyncio
-import aiofiles
 from threading import Thread
 from queue import Queue
 import requests
