@@ -58,7 +58,7 @@ class Parser:
                             continue
                         was_url.add(url)
                         if url not in checking_url:
-                            path = os.path.join('result', base_keyword)
+                            path = os.path.join('result', base_keyword.replace(' ', '_'))
                             if not os.path.exists(path):
                                 os.makedirs(path)
                             full_path = os.path.join(path, f'{uuid.uuid4()}.jpg')
