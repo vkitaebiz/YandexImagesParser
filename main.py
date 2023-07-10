@@ -23,6 +23,16 @@ logger.addHandler(sh)
 class Parser:
     def __init__(self):
         self._parser = YandexImage()
+        self._result_folder = 'result'
+
+
+    def _get_folders_with_files(self):
+        folders = os.path.join(self._result_folder)
+        folders = list(filter(lambda folder: os.listdir(folders), folders))
+        return folders
+
+
+
 
     def producer(self, queue):
         checking_url = set()
@@ -31,9 +41,13 @@ class Parser:
         df = df[df['Чистый запрос'].str.lower().str.strip() != 'нет']
         df = df[df['Чистый запрос'].str.lower().str.strip() != 'стоп']
         was_keyword = set()
+
         was_url = set()
+        full_folders =  self._get_folders_with_files()
         for _, row in df.iterrows():
-            base_keyword = row['Keyword']
+            base_keyword = row['Keyword'].replace(' ', '_')
+            if base_keyword in full_folders:
+                continue
             keywords = row['Чистый запрос'].split('\n')
             for keyword in keywords:
                 if keyword in was_keyword:
@@ -62,7 +76,7 @@ class Parser:
                             continue
                         was_url.add(url)
                         if url not in checking_url:
-                            path = os.path.join('result', base_keyword.replace(' ', '_'))
+                            path = os.path.join('result', base_keyword)
                             if not os.path.exists(path):
                                 os.makedirs(path)
                             full_path = os.path.join(path, f'{uuid.uuid4()}.jpg')
