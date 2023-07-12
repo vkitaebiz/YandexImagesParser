@@ -24,10 +24,12 @@ class Parser:
     def __init__(self):
         self._parser = YandexImage()
         self._result_folder = os.path.join(os.path.expanduser("~"), 'Yandex.Disk','result')
+        self._old_result_folder = 'result'
 
     def _get_folders_with_files(self):
-        folders = os.listdir(self._result_folder)
-        folders = list(filter(lambda folder: os.listdir(os.path.join(self._result_folder, folder)), folders))
+        result_folder = self._old_result_folder
+        folders = os.listdir(result_folder)
+        folders = list(filter(lambda folder: os.listdir(os.path.join(result_folder, folder)), folders))
         return folders
 
 
