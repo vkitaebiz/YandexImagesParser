@@ -23,8 +23,7 @@ logger.addHandler(sh)
 class Parser:
     def __init__(self):
         self._parser = YandexImage()
-        self._result_folder = 'result'
-
+        self._result_folder = os.path.join(os.path.expanduser("~"), 'Yandex.Disk','result')
 
     def _get_folders_with_files(self):
         folders = os.listdir(self._result_folder)
@@ -76,11 +75,10 @@ class Parser:
                             continue
                         was_url.add(url)
                         if url not in checking_url:
-                            path = os.path.join('result', base_keyword)
+                            path = os.path.join(self._result_folder, base_keyword)
                             if not os.path.exists(path):
                                 os.makedirs(path)
                             full_path = os.path.join(path, f'{uuid.uuid4()}.jpg')
-
                             queue.put((url, full_path))
                             checking_url.add(url)
                 pause = random.randint(1, 300)
