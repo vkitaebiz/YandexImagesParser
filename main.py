@@ -9,6 +9,7 @@ from threading import Thread
 from queue import Queue
 import requests
 import uuid
+import platform
 
 
 logger = logging.Logger(__name__)
@@ -23,7 +24,12 @@ logger.addHandler(sh)
 class Parser:
     def __init__(self):
         self._parser = YandexImage()
-        self._result_folder = os.path.join(os.path.expanduser("~"), 'Yandex.Disk','result')
+
+        os_name = platform.system()
+        if os_name == 'Windows':
+            self._result_folder = 'result'
+        elif os_name == 'Linux':
+            self._result_folder = os.path.join(os.path.expanduser("~"), 'Yandex.Disk','result')
         self._old_result_folder = self._result_folder
 
     def _get_folders_with_files(self):
