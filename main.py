@@ -24,7 +24,7 @@ class Parser:
     def __init__(self):
         self._parser = YandexImage()
         self._result_folder = os.path.join(os.path.expanduser("~"), 'Yandex.Disk','result')
-        self._old_result_folder = 'result'
+        self._old_result_folder = self._result_folder
 
     def _get_folders_with_files(self):
         result_folder = self._old_result_folder
