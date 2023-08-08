@@ -26,19 +26,18 @@ class Parser:
         self._parser = YandexImage()
 
         os_name = platform.system()
-        if os_name == 'Windows':
-            self._result_folder = 'result'
-        elif os_name == 'Linux':
-            self._result_folder = os.path.join(os.path.expanduser("~"), 'Yandex.Disk','result')
-        self._old_result_folder = self._result_folder
+        # if os_name == 'Windows':
+        #     self._result_folder = 'result'
+        # elif os_name == 'Linux':
+        self._result_folder = os.path.join(os.path.expanduser("~"), 'Yandex.Disk','result')
+        if not os.path.exists(self._result_folder):
+            os.mkdir(self._result_folder)
 
     def _get_folders_with_files(self):
-        result_folder = self._old_result_folder
+        result_folder = self._result_folder
         folders = os.listdir(result_folder)
         folders = list(filter(lambda folder: os.listdir(os.path.join(result_folder, folder)), folders))
         return folders
-
-
 
 
     def producer(self, queue):
