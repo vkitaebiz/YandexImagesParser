@@ -5,7 +5,7 @@ from YandexImagesParser.ImageParser import YandexImage
 import pandas as pd
 import os
 from time import sleep
-from threading import Thread
+from threading import Thread, Event
 from queue import Queue
 import requests
 import uuid
@@ -91,7 +91,7 @@ class Parser:
                 pause = random.randint(1, 300)
                 logger.debug('Пауза запроса: %s', pause)
                 sleep(pause)
-        queue.put('stop')
+        self._stopper.set()
 
     @staticmethod
     def make_request_with_retries(url, max_retries=3):
@@ -117,7 +117,7 @@ class Parser:
 
     def start(self):
         queue = Queue()
-        # self.producer(queue)
+        self._stopper = Event()
         producer_thread = Thread(target=self.producer, args=(queue,))
         threads = []
         producer_thread.start()
@@ -125,12 +125,13 @@ class Parser:
         while True:
             if not queue.empty():
                 task = queue.get()
-                if task == 'stop':
-                    break
                 url, path = task
                 parser_thread = Thread(target=self.save_image, args=(url, path,))
                 parser_thread.start()
                 threads.append(parser_thread)
+            else:
+                if self._stopper.is_set():
+                    break
 
         for thread in threads:
             thread.join()
