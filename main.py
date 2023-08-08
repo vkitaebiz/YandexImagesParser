@@ -29,7 +29,7 @@ class Parser:
         # if os_name == 'Windows':
         #     self._result_folder = 'result'
         # elif os_name == 'Linux':
-        self._result_folder = os.path.join(os.path.expanduser("~"), 'Yandex.Disk','result')
+        self._result_folder = 'result'
         if not os.path.exists(self._result_folder):
             os.mkdir(self._result_folder)
 
@@ -42,19 +42,19 @@ class Parser:
 
     def producer(self, queue):
         checking_url = set()
-        df = pd.read_csv('analytics.csv', sep = ',', encoding='cp1251')
-        df = df[df['Чистый запрос'].notna()]
-        df = df[df['Чистый запрос'].str.lower().str.strip() != 'нет']
-        df = df[df['Чистый запрос'].str.lower().str.strip() != 'стоп']
+        df = pd.read_csv('analitics_clear.csv', sep = ',', encoding='utf8')
+        df = df[df['Запрос из Яндекс.Картинки'].notna()]
+        df = df[df['Запрос из Яндекс.Картинки'].str.lower().str.strip() != 'нет']
+        df = df[df['Запрос из Яндекс.Картинки'].str.lower().str.strip() != 'стоп']
         was_keyword = set()
 
         was_url = set()
         full_folders =  self._get_folders_with_files()
         for _, row in df.iterrows():
-            base_keyword = row['Keyword'].replace(' ', '_')
+            base_keyword = row['Запрос'].replace(' ', '_')
             if base_keyword in full_folders:
                 continue
-            keywords = row['Чистый запрос'].split('\n')
+            keywords = row['Запрос из Яндекс.Картинки'].split('\n')
             for keyword in keywords:
                 if keyword in was_keyword:
                     continue
