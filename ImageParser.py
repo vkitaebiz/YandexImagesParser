@@ -46,14 +46,25 @@ class YandexImage:
         self.version = '1.0-release'
         self.about = 'Yandex Images Parser'
 
-    def search(self, query: str, sizes: Size = 'large') -> list:
-        request = requests.get('https://yandex.ru/images/search',
+    def search(self, query: str, sizes: Size, proxy=None) -> list:
+        if proxy:
+            request = requests.get('https://yandex.ru/images/search',
                                params={"text": query,
                                        "nomisspell": 1,
                                        "noreask": 1,
                                        "isize": sizes
                                        },
-                               headers=self.headers)
+                               headers=self.headers,
+                            proxies={"http": proxy, "https": proxy})
+        else:
+            request = requests.get('https://yandex.ru/images/search',
+                                   params={"text": query,
+                                           "nomisspell": 1,
+                                           "noreask": 1,
+                                           "isize": sizes
+                                           },
+                                   headers=self.headers)
+
 
         soup = bs4(request.text, 'html.parser')
         items_place = soup.find('div', {"class": "serp-list"})
