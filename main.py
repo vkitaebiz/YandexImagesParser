@@ -157,7 +157,7 @@ class Parser:
         self._stopper.set()
 
     @staticmethod
-    def make_request_with_retries(url, max_retries=3):
+    def make_request_with_retries(url, max_retries=20):
         for attempt in range(max_retries):
             try:
                 response = requests.get(url)
