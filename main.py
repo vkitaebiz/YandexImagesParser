@@ -51,7 +51,6 @@ class Parser:
         return folders
 
 
-
     def _parse_row(self, row, proxy):
         full_folders = self._get_folders_with_files()
         base_keyword = row['Запрос'].replace(' ', '_')
@@ -96,10 +95,11 @@ class Parser:
             sleep(pause)
 
 
-    @staticmethod
-    def __get_row(df):
+
+    def __get_row(self, df):
         for n, row in df.iterrows():
             yield row
+
 
 
 
@@ -142,17 +142,6 @@ class Parser:
 
         for worker in workers:
             worker.join()
-
-
-
-
-
-
-
-
-
-
-
 
         self._stopper.set()
 
