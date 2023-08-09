@@ -29,6 +29,7 @@ logger.addHandler(sh)
 
 class Parser:
     def __init__(self):
+        self._who_attempt_rows = []
         self._lock = Lock()
         self._was_keyword = set()
         self._was_url = set()
@@ -70,15 +71,10 @@ class Parser:
             self._was_keyword.add(keyword)
             logger.debug(keyword)
             if not keyword: continue
-            while True:
-                result = self._parser.search(keyword, self._parser.size.large, proxy)
-                if not result:
-                    logger.error('Проблемы с парсингом')
-                    pause = 600
-                    logger.debug('Пауза основного парсера из-за пустого ответа: %s', pause)
-                    sleep(pause)
-                else:
-                    break
+            result = self._parser.search(keyword, self._parser.size.large, proxy)
+            if not result:
+                self._who_attempt_rows.append(row)
+                return
 
             for item in result:
                 url = item.url
@@ -106,8 +102,11 @@ class Parser:
     def __get_row(self, df):
         for n, row in df.iterrows():
             yield row
-
-
+        while True:
+            if self._who_attempt_rows:
+                yield self._who_attempt_rows.pop()
+            else:
+                break
 
 
     def _get_row_generator(self, file = 'analitics_clear.csv'):
