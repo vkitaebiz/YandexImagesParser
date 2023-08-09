@@ -17,7 +17,7 @@ from typing import Optional
 
 logger = logging.Logger(__name__)
 
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 sh = logging.StreamHandler()
 basic_formater = logging.Formatter('%(asctime)s : [%(levelname)s] : : %(lineno)d %(message)s')
 sh.setFormatter(basic_formater)
@@ -43,6 +43,9 @@ class Parser:
 
         proxy_master = ProxyMaster()
         self._proxies = proxy_master.get_proxy()
+        self._workers_threads = []
+        self._parsers_threads = []
+
 
     def _get_folders_with_files(self):
         result_folder = self._result_folder
@@ -134,22 +137,24 @@ class Parser:
 
 
     def _producer(self):
-        workers = []
         for proxy in self._proxies:
             worker = Thread(target=self._worker, args=(proxy,))
             worker.start()
-            workers.append(worker)
+            self._workers_threads.append(worker)
 
-        for worker in workers:
+        for worker in self._workers_threads:
             worker.join()
 
         self._stopper.set()
 
     @staticmethod
-    def make_request_with_retries(url, max_retries=20):
+    def make_request_with_retries(url, proxy = None, max_retries=20):
         for attempt in range(max_retries):
             try:
-                response = requests.get(url)
+                if not proxy:
+                     response = requests.get(url)
+                else:
+                    response = requests.get(url, proxies = {'http': proxy, 'https': proxy})
                 response.raise_for_status()  # raise an exception if the status is not 200
                 return response.content  # read response content
             except requests.exceptions.RequestException as exc:
@@ -162,7 +167,8 @@ class Parser:
 
     def save_image(self, url, path):
         logger.debug(f'{path} - {url}')
-        image_content = self.make_request_with_retries(url)
+        proxy = random.shuffle(self._proxies)
+        image_content = self.make_request_with_retries(url, proxy)
         if image_content:
             with open(path, 'wb') as file:
                 file.write(image_content)
@@ -170,22 +176,47 @@ class Parser:
     def start(self):
         self._stopper = Event()
         producer_thread = Thread(target=self._producer)
-        threads = []
         producer_thread.start()
-        threads.append(producer_thread)
+        monitor_thread = Thread(target=self._print_thread_counts)  # Новый поток для мониторинга
+        monitor_thread.start()  # Запуск потока
         while True:
             if not self._queue.empty():
                 task = self._queue.get()
                 url, path = task
                 parser_thread = Thread(target=self.save_image, args=(url, path,))
                 parser_thread.start()
-                threads.append(parser_thread)
+                self._parsers_threads.append(parser_thread)
             else:
                 if self._stopper.is_set():
                     break
 
-        for thread in threads:
+        for thread in self._parsers_threads:
             thread.join()
+
+        monitor_thread.join()
+        producer_thread.join()
+
+    def _print_thread_counts(self):
+        while not self._stopper.is_set():
+            sleep(1)
+            # Отфильтровать активные потоки
+            active_workers = [t for t in self._workers_threads if t.is_alive()]
+            active_parsers = [t for t in self._parsers_threads if t.is_alive()]
+
+            # Вывести количество активных потоков
+            logger.info(f'Парсеров картинок: {len(active_workers)}')
+            logger.info(f'Парсеров Яндекс.Картинки: {len(active_parsers )}')
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
