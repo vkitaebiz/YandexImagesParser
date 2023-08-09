@@ -163,12 +163,12 @@ class Parser:
                 response = requests.get(url)
                 response.raise_for_status()  # raise an exception if the status is not 200
                 return response.content  # read response content
-            except requests.exceptions.RequestException:
+            except requests.exceptions.RequestException as exc:
                 if attempt < max_retries - 1:  # if it's not the last attempt
-                    sleep(3)  # wait for 3 seconds before the next attempt
+                    sleep(random.randint(10, 150))  # wait for 3 seconds before the next attempt
                     continue
                 else:
-                    logger.debug(f"Failed to make a request to {url} after {max_retries} attempts")
+                    logger.error(exc)
                     return None
 
     def save_image(self, url, path):
