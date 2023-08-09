@@ -20,7 +20,7 @@ from typing import Optional
 
 logger = logging.Logger(__name__)
 
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
 basic_formater = logging.Formatter('%(asctime)s : [%(levelname)s] : : %(lineno)d %(message)s')
 sh.setFormatter(basic_formater)
@@ -130,7 +130,6 @@ class Parser:
 
 
     def _worker(self, proxy):
-
         while True:
             row: Optional[Series] = self._get_row()
             if row is not None:
@@ -188,7 +187,7 @@ class Parser:
                 if not self._queue.empty():
                     task = self._queue.get()
                     url, path = task
-                    executor.submit(self.save_image, args=(url, path,))
+                    executor.submit(self.save_image, url, path)
                 else:
                     if self._stopper.is_set():
                         break
