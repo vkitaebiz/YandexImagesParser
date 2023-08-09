@@ -1,5 +1,8 @@
+import concurrent.futures
 import logging
 import random
+import threading
+
 from python_modules.script_control import ScriptControl
 from YandexImagesParser.ImageParser import YandexImage
 import pandas as pd
@@ -45,6 +48,7 @@ class Parser:
         self._proxies = proxy_master.get_proxy()
         self._workers_threads = []
         self._parsers_threads = []
+
 
 
     def _get_folders_with_files(self):
@@ -126,14 +130,14 @@ class Parser:
 
 
     def _worker(self, proxy):
+
         while True:
             row: Optional[Series] = self._get_row()
             if row is not None:
                 self._parse_row(row, proxy)
             else:
                 logger.debug('Итератор завершил работу')
-
-
+                break
 
 
     def _producer(self):
@@ -178,17 +182,16 @@ class Parser:
         producer_thread = Thread(target=self._producer)
         producer_thread.start()
         monitor_thread = Thread(target=self._print_thread_counts)  # Новый поток для мониторинга
-        monitor_thread.start()  # Запуск потока
-        while True:
-            if not self._queue.empty():
-                task = self._queue.get()
-                url, path = task
-                parser_thread = Thread(target=self.save_image, args=(url, path,))
-                parser_thread.start()
-                self._parsers_threads.append(parser_thread)
-            else:
-                if self._stopper.is_set():
-                    break
+        monitor_thread.start()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(self._proxies)) as executor:
+            while True:
+                if not self._queue.empty():
+                    task = self._queue.get()
+                    url, path = task
+                    executor.submit(self.save_image, args=(url, path,))
+                else:
+                    if self._stopper.is_set():
+                        break
 
         for thread in self._parsers_threads:
             thread.join()
@@ -199,13 +202,7 @@ class Parser:
     def _print_thread_counts(self):
         while not self._stopper.is_set():
             sleep(1)
-            # Отфильтровать активные потоки
-            active_workers = [t for t in self._workers_threads if t.is_alive()]
-            active_parsers = [t for t in self._parsers_threads if t.is_alive()]
-
-            # Вывести количество активных потоков
-            logger.info(f'Парсеров картинок: {len(active_workers)}')
-            logger.info(f'Парсеров Яндекс.Картинки: {len(active_parsers )}')
+            logger.info('Всего потоков: %s', threading.active_count())
 
 
 
