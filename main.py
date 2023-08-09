@@ -160,7 +160,7 @@ class Parser:
                     response = requests.get(url, proxies = {'http': proxy, 'https': proxy})
                 response.raise_for_status()  # raise an exception if the status is not 200
                 return response.content  # read response content
-            except requests.exceptions.RequestException as exc:
+            except Exception as exc:
                 if attempt < max_retries - 1:  # if it's not the last attempt
                     sleep(random.randint(10, 150))  # wait for 3 seconds before the next attempt
                     continue
