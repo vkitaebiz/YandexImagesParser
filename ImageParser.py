@@ -65,14 +65,14 @@ class YandexImage:
                                            },
                                    headers=self.headers)
 
-
+        output = []
         soup = bs4(request.text, 'html.parser')
         items_place = soup.find('div', {"class": "serp-list"})
-        output = list()
         try:
-            items = items_place.find_all("div", {"class": "serp-item"})
+             items = items_place.find_all("div", {"class": "serp-item"})
         except AttributeError:
             return output
+
 
         for item in items:
             data = json.loads(item.get("data-bem"))
